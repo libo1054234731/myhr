@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<!--设置浏览器的布局视口，只在移动端浏览器起作用-->
+		<meta name="viewport" content="width=width-device,initial-scale=1,user-scalable=no" />
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		<link rel="stylesheet" href="css/login.css" />
+		<!--引入日历css-->
+		<link rel="stylesheet" type="text/css" href="js/datetimepicker/jquery.datetimepicker.css" />
+		<!--判断如果是IE9以下，引入兼容h5标签的js文件，注意空格的位置-->
+		<!--[if lt IE 9]>
+		<script src="JS/bootstrap/css/html5shiv.min.js"></script>
+		<script src="JS/bootstrap/css/respond.min.js"></script>	
+		<![end if] -->
+		<style type="text/css">
+			
+			a {
+				text-decoration: none;
+			}
+		</style>
+
+		<body>
+			<!--登录主体区开始-->
+			<div id="main">
+				<!--头像区开始-->
+				<div id="header_pic">
+					<div class="wrapper"></div>
+				</div>
+				<!--头像区结束-->
+				<!--账号密码区开始-->
+				<div id="account">
+					<div class="input">
+						<input type="text" id="empLoginName" name="empLoginName" placeholder="please input username" />
+					</div>
+					<div class="input">
+						<input type="password" id="empPwd" name="empPwd" placeholder="please input password" />
+					</div>
+				</div>
+				<!--账号密码区结束-->
+				<!--登录按钮开始-->
+				<input type="button" value="Sign In" class="btn1" id="login-btn" />
+
+				<!--登录按钮结束-->
+				<!--忘记密码开始-->
+				<div id="footer">
+					<a href="#">Forget Password?</a>
+				</div>
+				<!--忘记密码结束-->
+			</div>
+			<!--登录主体区结束-->
+
+			<!--引入jquery-->
+			<script src="js/jquery.js"></script>
+			<!--引入layer插件-->
+			<script src="js/layer/layer.js"></script>
+			<!--引用全局公共js功能 -->
+			<script src="js/global.js" type="text/javascript" charset="utf-8"></script>
+
+			<script type="text/javascript">
+				$(function() {
+
+					var empLoginName = $('#empLoginName');
+					var empPwd = $('#empPwd');
+
+					//打开网页判断登录名和头像
+					if (localStorage.getItem('empLoginName')) {
+						empLoginName.val(localStorage.getItem('empLoginName'));
+					}
+					if (localStorage.getItem('empPic')) {
+						$('.wrapper').css('background', 'url(' + localStorage.getItem("empPic") + ')');
+					}
+
+					$('#login-btn').click(function() {
+
+						var params = {
+							empLoginName: empLoginName.val(),
+							empPwd: empPwd.val()
+						}
+
+						if (empLoginName.val() == '') {
+							layer.msg('请输入登录账号!');
+							empLoginName.focus();
+							return false;
+						} else if (empPwd.val() == '') {
+							layer.msg('请输入登录密码!');
+							empLoginName.focus();
+							return false;
+						}
+
+						$.ajax({
+							url: baseUrl + '/LoginServlet',
+							type: 'POST',
+							dataType: 'json',
+							data: params,
+							async: false
+						}).done(function(data) {
+
+							if (data == 1) {
+								layer.msg('用户名不存在!');
+								empLoginName.focus();
+							} else if (data == 2) {
+								layer.msg('密码错误!');
+								empPwd.focus();
+							} else if (data == 3) {
+								layer.msg('登录成功!');
+								//记录用户名到本地存储
+								localStorage.setItem('empLoginName', empLoginName.val());
+
+								/**
+								 * 如果有头像,把头像数据存到本地存储里
+								 */
+
+								$.ajax({
+										type: "get",
+										url: baseUrl + "/GetEmpPicServlet",
+										dataType: 'html',
+										async: false
+									})
+									.done(function(data) {
+										if (data != 'null' && data) {
+											localStorage.setItem('empPic', data);
+										} else {
+											localStorage.removeItem('empPic');
+										}
+										location.href = 'main.html';
+									})
+									.fail(function(xhr, errorStatus, errorText) {
+										layer.msg('请求失败,' + errorText + ',' + xhr.status);
+										return false;
+									});
+
+							}
+
+						}).fail(function(xhr, errorStatus, errorText) {
+							layer.msg('请求失败,' + errorText + ',' + xhr.status)
+							return false;
+						});
+					});
+
+				});
+			</script>
+		</body>
+
+</html>

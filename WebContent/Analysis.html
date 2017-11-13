@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<!--设置浏览器的布局视口，只在移动端浏览器起作用-->
+		<meta name="viewport" content="width=width-device,initial-scale=1,user-scalable=no" />
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+
+		<!--判断如果是IE9以下，引入兼容h5标签的js文件，注意空格的位置-->
+		<!--[if lt IE 9]>
+		<script src="JS/bootstrap/css/html5shiv.min.js"></script>
+		<script src="JS/bootstrap/css/respond.min.js"></script>		
+		<![end if] -->
+	</head>
+
+	<body>
+		<div class="container">
+
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">数据分析</a></li>
+				<li>数据图表</li>
+			</ol>
+
+			<h2 class="page-header">数据统计分析</h2>
+
+			<div id="main_avg" style="height: 400px;"></div>
+			<div id="main_min" style="height: 400px;"></div>
+			<div id="main_max" style="height: 400px;"></div>
+			<div id="main" style="height: 400px;"></div>
+
+			<div class="col-sm-12" id="empCount" style="height: 400px;"></div>
+
+		</div>
+
+		<!--引入jquery-->
+		<script src="js/jquery.js"></script>
+		<!--引入bootstrap的js功能-->
+		<script src="js/bootstrap/js/bootstrap.js"></script>
+		<script src="js/layer/layer.js" type="text/javascript" charset="utf-8"></script>
+		<!--引用全局公共js功能 -->
+		<script src="js/global.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/echarts/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+	</body>
+
+	<script type="text/javascript">
+		$(function() {
+			var deptName = [];
+			var empCount = [];
+			var empAvg1 = [];
+			var empAvg = [];
+			var empMax = [];
+			var empMin = [];
+			var empMax1 = [];
+			var empMin1 = [];
+			
+			
+			
+			
+			var myChart2 = echarts.init(document.getElementById('main_avg'));
+			// 指定图表的配置项和数据
+			var option_avg = {
+				title: {
+					text: '部门平均工资',
+					x: 'center'
+				},
+				tooltip: {
+					trigger: 'item'
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					// 图例名字和数据的名字一定要一致，鼠标悬停图例和单击图例有功能
+					data: []
+				},
+				series: [{
+					name: '部门名称',
+					type: 'pie',
+					radius: '55%',
+					// 水平位置，垂直位置
+					center: ['50%', '60%'],
+					data: []
+				}]
+			};
+			
+			var myChart3 = echarts.init(document.getElementById('main_min'));
+			// 指定图表的配置项和数据
+			var option_min = {
+				title: {
+					text: '部门最低工资',
+					x: 'center'
+				},
+				tooltip: {
+					trigger: 'item'
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					// 图例名字和数据的名字一定要一致，鼠标悬停图例和单击图例有功能
+					data: []
+				},
+				series: [{
+					name: '部门名称',
+					type: 'pie',
+					radius: '55%',
+					// 水平位置，垂直位置
+					center: ['50%', '60%'],
+					data: []
+				}]
+			};
+			
+			var myChart4 = echarts.init(document.getElementById('main_max'));
+			// 指定图表的配置项和数据
+			var option_max = {
+				title: {
+					text: '部门最高工资',
+					x: 'center'
+				},
+				tooltip: {
+					trigger: 'item'
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					// 图例名字和数据的名字一定要一致，鼠标悬停图例和单击图例有功能
+					data: []
+				},
+				series: [{
+					name: '部门名称',
+					type: 'pie',
+					radius: '55%',
+					// 水平位置，垂直位置
+					center: ['50%', '60%'],
+					data: []
+				}]
+			};
+			
+			
+			
+			
+			
+			// 统计部门的员工人数
+			var myChart = echarts.init(document.getElementById('empCount'));
+
+			$.ajax({
+					type: "post",
+					url: baseUrl + '/QueryEmpCountServlet',
+					dataType: 'json',
+					async: false
+				})
+				.done(function(data) {
+
+					$.each(data, function(index, item) {
+
+						deptName.push(item.deptName);
+
+						empCount.push(item.empCount);
+						empAvg.push(item.empAvg);
+						empMax.push(item.empMax);
+						empMin.push(item.empMin);
+
+						empAvg1.push({
+							value: item.empAvg,
+							name: item.deptName
+						});
+						empMax1.push({
+							value: item.empMax,
+							name: item.deptName
+						});
+						empMin1.push({
+							value: item.empMin,
+							name: item.deptName
+						});
+
+					});
+
+					option_avg.legend.data = deptName;
+					option_max.legend.data = deptName;
+					option_min.legend.data = deptName;
+					option_avg.series[0].data = empAvg1;
+					option_max.series[0].data = empMax1;
+					option_min.series[0].data = empMin1;
+					// 使用刚指定的配置项和数据显示图表。
+					myChart2.setOption(option_avg);
+					myChart3.setOption(option_min);
+					myChart4.setOption(option_max);
+				})
+				.error(function(xhr) {
+					layer.msg('请求失败,' + xhr.status);
+				});
+
+			
+			
+			// 指定图表的配置项和数据
+			var option = {
+				title: {
+					text: '部门人数统计',
+				},
+				// 工具箱
+				toolbox: {
+					// 是否显示
+					show: true,
+					feature: {
+						// 数据视图
+						dataView: {
+							show: true
+						},
+						// 还原
+						restore: {
+							show: true
+						},
+						// 缩放视图
+						dataZoom: {
+							show: false
+						},
+						// 是否保存图片
+						saveAsImage: {
+							show: true
+						},
+						// 动态类型切换
+						magicType: {
+							type: ['line', 'bar']
+						}
+					}
+				},
+				// 鼠标悬停提示框
+				tooltip: {
+					// axis就是x轴触发
+					trigger: 'axis'
+				},
+				legend: {
+					data: ['人数']
+				},
+				xAxis: {
+					data: deptName
+				},
+				yAxis: {},
+				series: [{
+					name: '人数',
+					type: 'bar',
+					data: empCount
+				}]
+			};
+
+			// 使用刚指定的配置项和数据显示图表。
+			myChart.setOption(option);
+
+			// 基于准备好的dom，初始化echarts实例
+			var myChart = echarts.init(document.getElementById('main'));
+
+			// 指定图表的配置项和数据
+			var option1 = {
+				// 标题
+				title: {
+					text: '部门工资统计'
+				},
+				// 工具箱
+				toolbox: {
+					show: true,
+					feature: {
+						// 数据视图
+						dataView: {
+							show: true
+						},
+						// 还原
+						restore: {
+							show: true
+						},
+						// 缩放视图
+						dataZoom: {
+							show: false
+						},
+						// 是否保存图片
+						saveAsImage: {
+							show: true
+						},
+						// 动态类型切换
+						magicType: {
+							type: ['line', 'bar']
+						}
+					}
+				},
+				// 鼠标悬停提示框
+				tooltip: {
+					// axis就是x轴触发
+					trigger: 'axis'
+				},
+				// 图例
+				legend: {
+					data: ['最高工资', '最低工资', '平均工资']
+				},
+				// x轴
+				xAxis: {
+					data: deptName
+				},
+				// y轴
+				yAxis: {},
+				// 数据
+				series: [{
+					name: '最高工资',
+					type: 'bar', //柱形图
+					data: empMax
+				}, {
+
+					name: '最低工资',
+					type: 'bar', //折线图
+					data: empMin
+				}, {
+
+					name: '平均工资',
+					type: 'bar', //折线图
+					data: empAvg
+				}]
+			};
+
+			// 使用刚指定的配置项和数据显示图表。
+			myChart.setOption(option1);
+
+		});
+	</script>
+
+</html>

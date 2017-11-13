@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<!--设置浏览器的布局视口，只在移动端浏览器起作用-->
+		<meta name="viewport" content="width=width-device,initial-scale=1,user-scalable=no" />
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+
+		<!--引入日历css-->
+		<link rel="stylesheet" type="text/css" href="js/datetimepicker/jquery.datetimepicker.css" />
+		<!--判断如果是IE9以下，引入兼容h5标签的js文件，注意空格的位置-->
+		<!--[if lt IE 9]>
+		<script src="JS/bootstrap/css/html5shiv.min.js"></script>
+		<script src="JS/bootstrap/css/respond.min.js"></script>	
+		<![end if] -->
+		
+	</head>
+
+	<body>
+		<div class="container">
+
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">职务管理</a></li>
+				<li>查询职务数据</li>
+			</ol>
+
+			<h2 class="page-header">职务列表</h2>
+			<table class="table table-bordered table-striped" id="dataTable">				
+				<thead>
+					<tr>
+						<th>职务编号</th>
+						<th>职务姓名</th>
+						<th>最低工资</th>
+						<th>最高工资</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+				</tbody>
+			</table>
+
+			<div class="row">
+				<div class="col-sm-4 col-sm-offset-8">
+					<a href="addJob.html" class="btn btn-success btn-block">增加新职务</a>
+				</div>
+			</div>
+
+		</div>
+
+		<!--引入jquery-->
+		<script src="js/jquery.js"></script>
+		<!--引用参数工具js功能 -->
+		<!--<script src="js/param.js" type="text/javascript" charset="utf-8"></script>-->
+		<!--引入bootstrap的js功能-->
+		<script src="js/bootstrap/js/bootstrap.js"></script>
+		<!--引入提示框js-->
+		<script src="js/layer/layer.js" type="text/javascript" charset="utf-8"></script>
+		
+		<!--引用全局公共js功能 -->
+		<script src="js/global.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			$(function() {
+				
+				$.getJSON(baseUrl + '/QueryJobServlet', function(data) {
+					
+						var html;
+						
+						var dataTable = $('#dataTable tbody');
+						
+						//清空原始数据
+//						dataTable.empty();
+						//遍历后台返回的数据
+						$.each(data, function(index, item) {
+							html = '<tr>';
+							html += '	<td>' + item.jobId + '</td>';
+							html += '	<td>' + item.jobName + '</td>';
+							html += '	<td>' + item.jobMinSal + '</td>';
+							html += '	<td>' + item.jobMaxSal + '</td>';
+							html += '	<td>';
+							html += '		<input type="button" class="btn btn-primary btn-sm update-btn" value="详情" data-id="'+item.jobId+'" />';
+							html += '		<input type="button" class="btn btn-danger btn-sm del-btn" value="删除" data-id="'+item.jobId+'" />';
+							html += '</tr>';
+							dataTable.append(html);
+						});
+
+						
+					})
+					.error(function(xhr) {
+						layer.msg('请求失败,' + xhr.status);
+					});
+					
+					$('#dataTable').on('click', '.del-btn', function() {
+					if (!window.confirm('确定要删除此员工数据吗?')) {
+						return;
+					} else {
+						//获得当前员工Id
+						var that = this;
+						var jobId = $(this).attr('data-id');
+						$.post(baseUrl + '/DelJobServlet', {
+								jobId: jobId
+							}, function() {
+								layer.msg('删除成功!');
+								//删除前端数据行
+								$(that).parents('tr').remove();
+							})
+							.error(function(xhr, errorStatus, errorText) {
+								layer.msg('请求失败!,' + xhr.status + ',' + errorText);
+							});
+					}
+				});
+				
+				
+				
+				//利用事件委托  添加详情按钮
+				$('#dataTable').on('click', '.update-btn', function() {
+					var jobId = $(this).attr('data-id');
+					// 利用iframe加载其他网页内容到页面层 type:2
+					// 员工详情模态层
+					layer.open({
+						title: '员工详情',
+						type: 2,
+						area: ['1000px', '720px'], //宽高
+						//将 当前页码,每页数据条数返回  详情页面
+						content: 'updateJob.html?jobId=' + jobId 
+					});
+				});
+				
+					
+					
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<!--设置浏览器的布局视口，只在移动端浏览器起作用-->
+		<meta name="viewport" content="width=width-device,initial-scale=1,user-scalable=no" />
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+
+		<!--引入日历css-->
+		<link rel="stylesheet" type="text/css" href="js/datetimepicker/jquery.datetimepicker.css" />
+		<!--判断如果是IE9以下，引入兼容h5标签的js文件，注意空格的位置-->
+		<!--[if lt IE 9]>
+		<script src="JS/bootstrap/css/html5shiv.min.js"></script>
+		<script src="JS/bootstrap/css/respond.min.js"></script>	
+		<![end if] -->
+		<style type="text/css">
+			.pagination {
+				margin: 0!important;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+
+			<h2 class="page-header">主页</h2>
+
+			<form id="form1" class="form-horizontal">
+				<div class="form-group">
+					<label for="" class="col-md-2">服务器详情:</label>
+					<div class="col-md-10">
+						<input id="server" name="server" type="text" readonly class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-md-2">服务器时间:</label>
+					<div class="col-md-10">
+						<input id="date" name="date" type="text" readonly class="form-control" />
+					</div>
+				</div>
+			</form>
+		</div>
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<!--引入bootstrap的js功能-->
+		<script src="js/bootstrap/js/bootstrap.js"></script>
+		
+		<script type="text/javascript">
+			$(function() {
+
+				$.ajaxSetup({
+
+					complete: function(xhr, textStatus) {
+						//通过ajax核心对象获得响应报头
+						var Server = xhr.getResponseHeader('Server');
+						$('#server').val(Server);
+						var Date = xhr.getResponseHeader('Date');
+						$('#date').val(Date);
+						
+					}
+				});
+				$.ajax({
+					type: "post",
+					url: 'http://localhost/hr' + '/QueryEmpServlet',
+					async: true
+				});
+
+			});
+		</script>
+	</body>
+
+</html>
